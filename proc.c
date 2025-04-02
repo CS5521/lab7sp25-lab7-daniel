@@ -5,6 +5,7 @@
 #include "mmu.h"
 #include "x86.h"
 #include "proc.h"
+#include "pstat.h"
 #include "spinlock.h"
 
 struct {
@@ -138,6 +139,8 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
+  p->tickets = 10;
+  p->ticks = 0;
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -188,6 +191,8 @@ fork(void)
   if((np = allocproc()) == 0){
     return -1;
   }
+  np->ticks = 0;
+  np->tickets = 10 > curproc->tickets ? 10 : curproc->tickets;
 
   // Copy process state from proc.
   if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
