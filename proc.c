@@ -316,6 +316,50 @@ wait(void)
   }
 }
 
+#define MODULUS ((1U << 31) - 1)
+#define LOWMASK 0xffff
+static long int state[3] = {23948, 1330, 3142987};
+
+/**
+ * Generate a pseudorandom number sourced from a
+ * 3-dimensional Integer Domain Chaotic map
+ * (see https://doi.org/10.1016/j.vlsi.2024.102200)
+ *
+ *                     [ 4032, 727, -2854 ]
+ * based on the matrix [ 1848, 677, -1420 ]
+ *                     [ 4655, 942, -3308 ]
+ * 
+ * with initial state vector [23948, 1330, 3142987].
+ *
+ * The matrix is multiplied into the transpose of the
+ * state vector modulo 2^31-1 to get the next state.
+ * The random number returned is the concatenation of
+ * the low 16 bits of state[1] with the low 16 bits of
+ * state[0], all XORed with state[2].
+ */
+int random()
+{ 
+  static const long int row1 = {4032, 727, -2854};
+  static const long int row2 = {1848, 677, -1420};
+  static const long int row3 = {4655, 942, -3308};
+
+  long int ns1 = 0, ns2 = 0, ns3 = 0;
+
+  int i;
+  for(i = 0; i < 3; i++)
+  {
+    ns1 += state[i] * row1[i];
+    ns2 += state[i] * row2[i];
+    ns3 += state[i] * row3[i];
+  }
+
+  state[0] = ns1 & MODULUS;
+  state[1] = ns2 & MODULUS;
+  state[2] = ns3 & MODULUS;
+
+  return (int) (((state[0] & LOWMASK) | (state[1] << 16)) ^ state[2]);
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
