@@ -334,14 +334,14 @@ static long int state[3] = {23948, 1330, 3142987};
  * The matrix is multiplied into the transpose of the
  * state vector modulo 2^31-1 to get the next state.
  * The random number returned is the concatenation of
- * the low 16 bits of state[1] with the low 16 bits of
+ * the low 15 bits of state[1] with the low 16 bits of
  * state[0], all XORed with state[2].
  */
 int random()
 { 
-  static const long int row1 = {4032, 727, -2854};
-  static const long int row2 = {1848, 677, -1420};
-  static const long int row3 = {4655, 942, -3308};
+  static const long int row1[3] = {4032, 727, -2854};
+  static const long int row2[3] = {1848, 677, -1420};
+  static const long int row3[3] = {4655, 942, -3308};
 
   long int ns1 = 0, ns2 = 0, ns3 = 0;
 
@@ -357,7 +357,7 @@ int random()
   state[1] = ns2 & MODULUS;
   state[2] = ns3 & MODULUS;
 
-  return (int) (((state[0] & LOWMASK) | (state[1] << 16)) ^ state[2]);
+  return (int) ((((state[0] & LOWMASK) | (state[1] << 16)) ^ state[2])) & 0x7fffffff;
 }
 
 //PAGEBREAK: 42
@@ -376,7 +376,7 @@ scheduler(void)
   c->proc = 0;
 
   int count, totaltickets, winner, i;
-  struct proc **runnables[NPROC];
+  struct proc *runnables[NPROC];
   
   for(;;){
     // Enable interrupts on this processor.
@@ -391,8 +391,8 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-      runnables[count++] = &p;
-      totaltickets += p.tickets;
+      runnables[count++] = p;
+      totaltickets += p->tickets;
     }
 
     if(count == 0)
@@ -413,7 +413,9 @@ scheduler(void)
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
-    c->proc = runnables[i];
+    p = runnables[i];
+    c->proc = p;
+    c->proc->ticks++;
     switchuvm(p);
     p->state = RUNNING;
 
