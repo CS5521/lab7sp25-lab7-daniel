@@ -540,6 +540,8 @@ procdump(void)
 
 void fillpstat(pstatTable* table)
 {
+  static const int state_lookup[6] = {'U', 'E', 'S', 'A', 'R', 'Z'};
+
   struct proc *p;
   pstat_t *entry;
 
@@ -547,13 +549,13 @@ void fillpstat(pstatTable* table)
 
   for(i = 0; i < NPROC; i++)
   {
-    p = &ptable.proc[i]
-    entry = &((*table)[i])
+    p = &ptable.proc[i];
+    entry = &((*table)[i]);
     entry->inuse = p->state != UNUSED;
     entry->pid = p->pid;
     entry->ticks = p->ticks;
     entry->tickets = p->tickets;
-    entry->state = p->state;
+    entry->state = state_lookup[p->state];
 
     for (j = 0; j < 16; j++)
     {

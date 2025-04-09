@@ -95,11 +95,9 @@ extern void fillpstat(pstatTable *);
 int sys_getpinfo(void)
 {
   pstatTable * stat;
-  if(argptr(0, (void**)&stat) < 0, sizeof(pstatTable))
+  if(argptr(0, (char**)&stat, sizeof(pstatTable) < 0))
     return -1;
 
-  fillpstat(stat); 
-
-  // do stuff
-  return 0;  
+  fillpstat(stat);
+  return 0;
 }

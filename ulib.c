@@ -104,3 +104,22 @@ memmove(void *vdst, const void *vsrc, int n)
     *dst++ = *src++;
   return vdst;
 }
+
+void ps()
+{
+  pstatTable table;
+  getpinfo(&table);
+
+  int i;
+
+  printf(1, "PID\tTKTS\tSTAT\tNAME\n");
+  for(i = 0; i < NPROC; i++)
+  {
+    if(!table[i].inuse) continue;
+    printf(1, "%d\t%d\t%c\t%s\n", table[i].pid,
+                                  table[i].tickets,
+                                  table[i].state,
+                                  table[i].name);
+  }
+}
+
