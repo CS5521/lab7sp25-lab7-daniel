@@ -537,3 +537,27 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+void fillpstat(pstatTable* table)
+{
+  struct proc *p;
+  pstat_t *entry;
+
+  int i,j;
+
+  for(i = 0; i < NPROC; i++)
+  {
+    p = &ptable.proc[i]
+    entry = &((*table)[i])
+    entry->inuse = p->state != UNUSED;
+    entry->pid = p->pid;
+    entry->ticks = p->ticks;
+    entry->tickets = p->tickets;
+    entry->state = p->state;
+
+    for (j = 0; j < 16; j++)
+    {
+      entry->name[j] = p->name[j];
+    }
+  }
+}
