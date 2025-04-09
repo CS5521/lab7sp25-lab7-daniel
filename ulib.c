@@ -112,12 +112,13 @@ void ps()
 
   int i;
 
-  printf(1, "PID\tTKTS\tSTAT\tNAME\n");
+  printf(1, "PID\tTKTS\tTCKS\tSTAT\tNAME\n");
   for(i = 0; i < NPROC; i++)
   {
     if(!table[i].inuse) continue;
-    printf(1, "%d\t%d\t%c\t%s\n", table[i].pid,
+    printf(1, "%d\t%d\t%d\t%c\t%s\n", table[i].pid,
                                   table[i].tickets,
+                                  table[i].ticks,
                                   table[i].state,
                                   table[i].name);
   }
